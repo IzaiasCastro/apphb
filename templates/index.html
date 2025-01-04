@@ -16,7 +16,10 @@
 </head>
 <body>
     <h1>Apartamentos Disponíveis em Parnaíba</h1>
-    <a href="/cadastro">Cadastrar Novo Apartamento</a>
+    {% if session['user_type'] == 'dono' %}
+    <a href="{{ url_for('cadastro') }}">Cadastrar Novo Apartamento {{ session['user_id'] }} {{ session['user_type'] }} </a>
+    {% endif %}
+
 
     <div id="map"></div>
 
