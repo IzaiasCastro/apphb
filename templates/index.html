@@ -16,32 +16,18 @@
 </head>
 <body>
     <h1>Apartamentos Disponíveis em Parnaíba</h1>
-    <a href="#">Cadastrar Novo Apartamento</a>
+    <a href="/cadastro">Cadastrar Novo Apartamento</a>
 
     <div id="map"></div>
 
     <script>
-        // Inicializar o mapa centrado em Parnaíba, PI
-        var map = L.map('map').setView([-5.0917, -42.8012], 13);  // Coordenadas de Parnaíba
 
-        // Adicionar o TileLayer do OpenStreetMap
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
+        var apartamentos = {{ apartamentos|tojson }};
+        
+        // Inicializar o mapa com uma coordenada padrão
+        var map = L.map('map');
 
-        // Dados estáticos de apartamentos cadastrados em Parnaíba
-        var apartamentos = [
-            { nome: "Apartamento A", descricao: "Apartamento próximo à Praia de Atalaia", latitude: -2.9015, longitude: -41.7662 },
-            { nome: "Apartamento B", descricao: "Apartamento em área central de Parnaíba", latitude: -2.9025, longitude: -41.7672 },
-        ];
-
-        // Adiciona marcadores para os apartamentos
-        apartamentos.forEach(function(apartamento) {
-            L.marker([apartamento.latitude, apartamento.longitude]).addTo(map)
-                .bindPopup("<b>" + apartamento.nome + "</b><br>" + apartamento.descricao);
-        });
-
-        // Geolocalização do usuário
+        // Tentar pegar a localização do usuário
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position) {
                 var userLocation = {
@@ -50,31 +36,29 @@
                 };
 
                 // Centraliza o mapa na localização do usuário
-                map.setView(userLocation, 13);
+                map.setView([userLocation.lat, userLocation.lng], 13);
 
-                // Adiciona um marcador para a localização do usuário
-                var userMarker = L.marker(userLocation).addTo(map)
+                // Adiciona marcador para a localização do usuário
+                L.marker([userLocation.lat, userLocation.lng]).addTo(map)
                     .bindPopup("Você está aqui!");
-
-                // Geocodificação reversa para obter o endereço
-                var apiUrl = `https://nominatim.openstreetmap.org/reverse?lat=${userLocation.lat}&lon=${userLocation.lng}&format=json`;
-
-                fetch(apiUrl)
-                    .then(response => response.json())
-                    .then(data => {
-                        var address = data.display_name || "Endereço não encontrado.";
-                        userMarker.bindPopup("Você está aqui!<br>Latitude: " + userLocation.lat.toFixed(4) + "<br>Longitude: " + userLocation.lng.toFixed(4) + "<br>Endereço: " + address)
-                            .openPopup();
-                    })
-                    .catch(error => {
-                        console.error("Erro ao obter o endereço: ", error);
-                        userMarker.bindPopup("Você está aqui!<br>Latitude: " + userLocation.lat.toFixed(4) + "<br>Longitude: " + userLocation.lng.toFixed(4) + "<br>Endereço: Não disponível")
-                            .openPopup();
-                    });
             }, function(error) {
-                console.error("Erro ao obter localização: " + error.message);
+                console.error("Erro ao obter a localização: ", error);
+                map.setView([-5.0917, -42.8012], 13);  // Centraliza em Parnaíba se não conseguir pegar a localização
             });
+        } else {
+            map.setView([-5.0917, -42.8012], 13);  // Centraliza em Parnaíba se a geolocalização não for suportada
         }
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+    
+        // Adiciona marcadores para os apartamentos
+        apartamentos.forEach(function(apartamento) {
+            L.marker([apartamento.latitude, apartamento.longitude]).addTo(map)
+                .bindPopup("<b>" + apartamento.nome + "</b><br>" + apartamento.descricao);
+        });
     </script>
+    
 </body>
 </html>
