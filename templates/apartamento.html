@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ apartamento.nome }}</title>
+</head>
+<body>
+    <h1>{{ apartamento.nome }}</h1>
+    <p>{{ apartamento.descricao }}</p>
+    <div id="map" style="height: 400px;"></div>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // Definir valores padrão caso latitude ou longitude sejam None
+        var lat = 51.505 ;
+        var lon = -0.09 ;
+        
+        // Inicializar o mapa
+        var map = L.map('map').setView([lat, lon], 13);
+
+        // Adicionar camada do OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Adicionar marcador no mapa com as informações do apartamento
+        L.marker([lat, lon]).addTo(map)
+            .bindPopup("<b>{{ apartamento.nome }}</b><br>{{ apartamento.descricao }}")
+            .openPopup();
+    </script>
+</body>
+</html>
