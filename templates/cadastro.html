@@ -4,33 +4,66 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro de Apartamento</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/dropzone@5.9.2/dist/dropzone.css" />
+    <script src="https://cdn.jsdelivr.net/npm/dropzone@5.9.2/dist/dropzone.min.js"></script>
 </head>
-<body>
-    <h1>Cadastro de Apartamento</h1>
+<body class="bg-gray-100">
+    {% include 'header.html' %}
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full">
+        <h1 class="text-2xl font-bold text-center text-gray-700 mb-6">Cadastro de Imóvel</h1>
 
-    <form action="/cadastro" method="POST">
-        <label for="nome">Nome:</label><br>
-        <input type="text" id="nome" name="nome" required><br>
+        <form action="/cadastro" method="POST" enctype="multipart/form-data">
+            <div class="grid grid-cols-3 gap-4">
+                <div class="mb-4">
+                    <label for="nome" class="block text-sm font-medium text-gray-600">Nome:</label>
+                    <input type="text" id="nome" name="nome" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label for="descricao" class="block text-sm font-medium text-gray-600">Descrição:</label>
+                    <input type="text" id="descricao" name="descricao" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label for="preco" class="block text-sm font-medium text-gray-600">Preço do aluguel:</label>
+                    <input type="text" id="preco" name="preco" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label for="cidade" class="block text-sm font-medium text-gray-600">Cidade:</label>
+                    <input type="text" id="cidade" name="cidade" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label for="bairro" class="block text-sm font-medium text-gray-600">Bairro:</label>
+                    <input type="text" id="bairro" name="bairro" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+                <div class="mb-4">
+                    <label for="endereco" class="block text-sm font-medium text-gray-600">Endereço:</label>
+                    <input type="text" id="endereco" name="endereco" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                </div>
+            </div>
 
-        <label for="descricao">Descrição:</label><br>
-        <input type="text" id="descricao" name="descricao" required><br>
+            <!-- Campos ocultos para latitude e longitude -->
+            <input type="hidden" id="latitude" name="latitude">
+            <input type="hidden" id="longitude" name="longitude">
 
-        <!-- Campos ocultos para latitude e longitude -->
-        <input type="hidden" id="latitude" name="latitude">
-        <input type="hidden" id="longitude" name="longitude">
+            <div class="mb-6">
+                <label for="descricao" class="block text-sm font-medium text-gray-600">Localização:</label>
+                <div id="map" style="height: 300px;"></div>
+            </div>
 
-        <button type="submit">Cadastrar Apartamento</button>
-    </form>
+            <div class="mb-6">
+                <label for="fotos" class="block text-sm font-medium text-gray-600">Fotos do Imóvel:</label>
+                <div class="dropzone" id="fotoUpload"></div>
+            </div>
 
-    <!-- Mapa -->
-    <div id="map" style="height: 500px; width: 100%;"></div>
+            <button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-md hover:bg-blue-600 focus:outline-none">Cadastrar Imóvel</button>
+        </form>
+    </div>
 
     <script>
         var map = L.map('map').setView([-5.0917, -42.8012], 13); // Coordenadas iniciais
 
-        // Adicionar o TileLayer do OpenStreetMap
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
@@ -42,17 +75,13 @@
                     var userLat = position.coords.latitude;
                     var userLng = position.coords.longitude;
 
-                    // Centraliza o mapa na localização do usuário
                     map.setView([userLat, userLng], 13);
 
-                    // Adiciona um marcador na posição do usuário
                     L.marker([userLat, userLng]).addTo(map)
                         .bindPopup("Você está aqui!");
 
-                    // Preenche os campos de latitude e longitude com as coordenadas do usuário
                     document.getElementById("latitude").value = userLat;
                     document.getElementById("longitude").value = userLng;
-
                 }, function() {
                     alert("Não foi possível obter a localização.");
                 });
@@ -61,28 +90,35 @@
             }
         }
 
-        // Chama a função para obter a localização do usuário
         getUserLocation();
 
-        // Variável global para armazenar o marcador do apartamento
         var apartmentMarker;
 
-        // Quando o mapa for clicado, adiciona o marcador do apartamento
         map.on('click', function(e) {
             var lat = e.latlng.lat;
             var lng = e.latlng.lng;
 
-            // Atualiza ou adiciona o marcador do apartamento
             if (apartmentMarker) {
                 apartmentMarker.setLatLng([lat, lng]);
             } else {
                 apartmentMarker = L.marker([lat, lng]).addTo(map);
             }
 
-            // Atualiza os campos de latitude e longitude do apartamento
             document.getElementById("latitude").value = lat;
             document.getElementById("longitude").value = lng;
         });
+
+        // Configuração do Dropzone
+        Dropzone.options.fotoUpload = {
+            url: '/upload', // Endereço para onde as fotos serão enviadas
+            paramName: 'file', // Nome do parâmetro enviado para o servidor
+            maxFilesize: 2, // Tamanho máximo dos arquivos em MB
+            acceptedFiles: 'image/*', // Somente arquivos de imagem
+            dictDefaultMessage: 'Arraste suas fotos aqui ou clique para selecionar',
+            dictFallbackMessage: 'Seu navegador não suporta o recurso de arrastar e soltar.',
+            dictInvalidFileType: 'Somente imagens são permitidas.',
+            dictFileTooBig: 'O arquivo é muito grande. O limite é de 2MB.',
+        };
     </script>
 </body>
 </html>

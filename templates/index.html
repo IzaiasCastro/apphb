@@ -4,64 +4,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Apartamentos Disponíveis em Parnaíba</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         #map {
             height: 500px;
             width: 100%;
         }
     </style>
-    <!-- Link para o Leaflet.js -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 </head>
-<body>
-    <h1>Apartamentos Disponíveis em Parnaíba</h1>
-    {% if session['user_type'] == 'dono' %}
-    <a href="{{ url_for('cadastro') }}">Cadastrar Novo Apartamento {{ session['user_id'] }} {{ session['user_type'] }} </a>
-    {% endif %}
+<body class="bg-gray-100">
+    {% include 'header.html' %}
+ 
+    <div class="container mx-auto p-6">
+        {% if session['user_type'] == 'dono' %}
+        <div class="text-center mb-4">
+            <a href="{{ url_for('cadastro') }}" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Cadastrar Novo Apartamento</a>
+            <a href="{{ url_for('cadastro') }}" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Meus imóveis cadastrados</a>
+        </div>
+        {% endif %}
 
+        <div id="map"></div>
 
-    <div id="map"></div>
+        {% include 'filtro.html' %}
 
-    <script>
+        <script>
+            var apartamentos = {{ apartamentos|tojson }};
+            
+            var map = L.map('map');
 
-        var apartamentos = {{ apartamentos|tojson }};
-        
-        // Inicializar o mapa com uma coordenada padrão
-        var map = L.map('map');
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var userLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
 
-        // Tentar pegar a localização do usuário
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                var userLocation = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                };
+                    map.setView([userLocation.lat, userLocation.lng], 13);
 
-                // Centraliza o mapa na localização do usuário
-                map.setView([userLocation.lat, userLocation.lng], 13);
+                    L.marker([userLocation.lat, userLocation.lng]).addTo(map)
+                        .bindPopup("Você está aqui!");
+                }, function(error) {
+                    console.error("Erro ao obter a localização: ", error);
+                    map.setView([-5.0917, -42.8012], 13);
+                });
+            } else {
+                map.setView([-5.0917, -42.8012], 13);
+            }
 
-                // Adiciona marcador para a localização do usuário
-                L.marker([userLocation.lat, userLocation.lng]).addTo(map)
-                    .bindPopup("Você está aqui!");
-            }, function(error) {
-                console.error("Erro ao obter a localização: ", error);
-                map.setView([-5.0917, -42.8012], 13);  // Centraliza em Parnaíba se não conseguir pegar a localização
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            apartamentos.forEach(function(apartamento) {
+                L.marker([apartamento.latitude, apartamento.longitude]).addTo(map)
+                    .bindPopup("<b>" + apartamento.nome + "</b><br>" + apartamento.descricao);
             });
-        } else {
-            map.setView([-5.0917, -42.8012], 13);  // Centraliza em Parnaíba se a geolocalização não for suportada
-        }
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }).addTo(map);
-    
-        // Adiciona marcadores para os apartamentos
-        apartamentos.forEach(function(apartamento) {
-            L.marker([apartamento.latitude, apartamento.longitude]).addTo(map)
-                .bindPopup("<b>" + apartamento.nome + "</b><br>" + apartamento.descricao);
-        });
-    </script>
-    
+        </script>
+    </div>
 </body>
 </html>
