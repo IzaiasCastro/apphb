@@ -21,13 +21,34 @@
         {% if session['user_type'] == 'dono' %}
         <div class="text-center mb-4">
             <a href="{{ url_for('cadastro') }}" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Cadastrar Novo Apartamento</a>
-            <a href="{{ url_for('cadastro') }}" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Meus imóveis cadastrados</a>
+            <a href="{{ url_for('meus_apartamentos') }}" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Meus imóveis cadastrados</a>
         </div>
         {% endif %}
+        
+        {% include 'filtro.html' %}
+
 
         <div id="map"></div>
 
-        {% include 'filtro.html' %}
+         <!-- Exibição dos Apartamentos Encontrados -->
+        <div class="mt-6">
+            <h2 class="text-2xl font-semibold">Imóveis Encontrados</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                {% for apartamento in apartamentos %}
+                <div class="bg-white p-4 rounded-lg shadow-md">
+                    <img src="{{ apartamento.fotos[0] }}" alt="{{ apartamento.nome }}" class="w-full h-48 object-cover rounded-md mb-4">
+                    <h3 class="text-lg font-semibold">{{ apartamento.nome }}</h3>
+                    <p class="text-sm text-gray-600">{{ apartamento.descricao }}</p>
+                    <p class="text-lg font-semibold mt-2">R$ {{ apartamento.preco }}</p>
+                    <p class="text-sm text-gray-500">{{ apartamento.tipo }}</p>
+                    <a href="{{ url_for('apartamento', id=apartamento.id) }}" class="mt-2 text-blue-500 hover:underline">Ver mais</a>
+
+                </div>
+                {% else %}
+                <p class="text-gray-500">Nenhum imóvel encontrado com os filtros aplicados.</p>
+                {% endfor %}
+            </div>
+        </div>
 
         <script>
              var apartamentos = {{ apartamentos|tojson }};

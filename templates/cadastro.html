@@ -16,32 +16,19 @@
         <h1 class="text-2xl font-bold text-center text-gray-700 mb-6">Cadastro de Imóvel</h1>
 
         <form action="/cadastro" method="POST" enctype="multipart/form-data">
-            <div class="grid grid-cols-3 gap-4">
+            <div class="grid grid-cols gap-4">
                 <div class="mb-4">
                     <label for="nome" class="block text-sm font-medium text-gray-600">Nome:</label>
                     <input type="text" id="nome" name="nome" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                 </div>
+            </div>
+            <div class="grid grid-cols gap-4">
                 <div class="mb-4">
                     <label for="descricao" class="block text-sm font-medium text-gray-600">Descrição:</label>
                     <input type="text" id="descricao" name="descricao" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
                 </div>
-                <div class="mb-4">
-                    <label for="preco" class="block text-sm font-medium text-gray-600">Preço do aluguel:</label>
-                    <input type="text" id="preco" name="preco" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <div class="mb-4">
-                    <label for="cidade" class="block text-sm font-medium text-gray-600">Cidade:</label>
-                    <input type="text" id="cidade" name="cidade" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <div class="mb-4">
-                    <label for="bairro" class="block text-sm font-medium text-gray-600">Bairro:</label>
-                    <input type="text" id="bairro" name="bairro" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
-                <div class="mb-4">
-                    <label for="endereco" class="block text-sm font-medium text-gray-600">Endereço:</label>
-                    <input type="text" id="endereco" name="endereco" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                </div>
             </div>
+                
 
             <input type="hidden" id="latitude" name="latitude">
             <input type="hidden" id="longitude" name="longitude">
@@ -55,6 +42,9 @@
                 <label for="fotos" class="block text-sm font-medium text-gray-600">Fotos do Imóvel:</label>
                 <div class="dropzone" id="fotoUpload"></div>
             </div>
+
+            <input type="hidden" id="filePaths" name="filePaths" value="">
+
 
             <button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-md hover:bg-blue-600 focus:outline-none">Cadastrar Imóvel</button>
         </form>
@@ -121,15 +111,23 @@
         });
 
         Dropzone.options.fotoUpload = {
-            url: '/upload',
-            paramName: 'file',
-            maxFilesize: 2,
-            acceptedFiles: 'image/*',
-            dictDefaultMessage: 'Arraste suas fotos aqui ou clique para selecionar',
-            dictFallbackMessage: 'Seu navegador não suporta o recurso de arrastar e soltar.',
-            dictInvalidFileType: 'Somente imagens são permitidas.',
-            dictFileTooBig: 'O arquivo é muito grande. O limite é de 2MB.',
-        };
+    url: '/upload',
+    paramName: 'file',
+    maxFilesize: 2, // Tamanho máximo (MB)
+    acceptedFiles: 'image/*', // Apenas imagens
+    dictDefaultMessage: 'Arraste suas fotos aqui ou clique para selecionar',
+    success: function (file, response) {
+        // Adiciona o caminho retornado pelo servidor ao campo oculto
+        var filePathsInput = document.getElementById('filePaths');
+        if (response.file_path) {
+            filePathsInput.value += response.file_path + ','; // Adiciona o caminho ao input oculto
+        }
+    },
+    error: function (file, message) {
+        alert("Erro ao enviar arquivo: " + message);
+    }
+};
+
     </script>
 </body>
 </html>
