@@ -43,7 +43,6 @@
                 </div>
             </div>
 
-            <!-- Campos ocultos para latitude e longitude -->
             <input type="hidden" id="latitude" name="latitude">
             <input type="hidden" id="longitude" name="longitude">
 
@@ -62,13 +61,26 @@
     </div>
 
     <script>
-        var map = L.map('map').setView([-5.0917, -42.8012], 13); // Coordenadas iniciais
+        var map = L.map('map').setView([-5.0917, -42.8012], 13);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        // Função para obter a localização do usuário
+        var userIcon = L.icon({
+            iconUrl: '/static/img/user-icon.png', 
+            iconSize: [60, 60],
+            iconAnchor: [15, 30],
+            popupAnchor: [0, -30]
+        });
+
+        var apartmentIcon = L.icon({
+            iconUrl: '/static/img/mark.png', 
+            iconSize: [30, 30],
+            iconAnchor: [15, 30],
+            popupAnchor: [0, -30]
+        });
+
         function getUserLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function(position) {
@@ -77,8 +89,8 @@
 
                     map.setView([userLat, userLng], 13);
 
-                    L.marker([userLat, userLng]).addTo(map)
-                        .bindPopup("Você está aqui!");
+                    L.marker([userLat, userLng], { icon: userIcon }).addTo(map)
+                        .bindPopup("Você está aqui! Clique no local do mapa em que se encontra o imóvel disponível!").openPopup();
 
                     document.getElementById("latitude").value = userLat;
                     document.getElementById("longitude").value = userLng;
@@ -101,19 +113,18 @@
             if (apartmentMarker) {
                 apartmentMarker.setLatLng([lat, lng]);
             } else {
-                apartmentMarker = L.marker([lat, lng]).addTo(map);
+                apartmentMarker = L.marker([lat, lng], { icon: apartmentIcon }).addTo(map);
             }
 
             document.getElementById("latitude").value = lat;
             document.getElementById("longitude").value = lng;
         });
 
-        // Configuração do Dropzone
         Dropzone.options.fotoUpload = {
-            url: '/upload', // Endereço para onde as fotos serão enviadas
-            paramName: 'file', // Nome do parâmetro enviado para o servidor
-            maxFilesize: 2, // Tamanho máximo dos arquivos em MB
-            acceptedFiles: 'image/*', // Somente arquivos de imagem
+            url: '/upload',
+            paramName: 'file',
+            maxFilesize: 2,
+            acceptedFiles: 'image/*',
             dictDefaultMessage: 'Arraste suas fotos aqui ou clique para selecionar',
             dictFallbackMessage: 'Seu navegador não suporta o recurso de arrastar e soltar.',
             dictInvalidFileType: 'Somente imagens são permitidas.',

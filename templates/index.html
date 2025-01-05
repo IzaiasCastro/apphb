@@ -30,37 +30,55 @@
         {% include 'filtro.html' %}
 
         <script>
-            var apartamentos = {{ apartamentos|tojson }};
-            
-            var map = L.map('map');
+             var apartamentos = {{ apartamentos|tojson }};
+    
+    var map = L.map('map');
 
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    var userLocation = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    };
+    // Ícone do usuário
+    var userIcon = L.icon({
+        iconUrl: '/static/img/user-icon.png',
+        iconSize: [60, 60],
+        iconAnchor: [30, 60],
+        popupAnchor: [0, -60]
+    });
 
-                    map.setView([userLocation.lat, userLocation.lng], 13);
+    // Ícone dos apartamentos
+    var apartmentIcon = L.icon({
+        iconUrl: '/static/img/apartment-disponivel-1.png',
+        iconSize: [40, 40],
+        iconAnchor: [20, 40],
+        popupAnchor: [0, -40]
+    });
 
-                    L.marker([userLocation.lat, userLocation.lng]).addTo(map)
-                        .bindPopup("Você está aqui!");
-                }, function(error) {
-                    console.error("Erro ao obter a localização: ", error);
-                    map.setView([-5.0917, -42.8012], 13);
-                });
-            } else {
-                map.setView([-5.0917, -42.8012], 13);
-            }
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            var userLocation = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(map);
+            map.setView([userLocation.lat, userLocation.lng], 13);
 
-            apartamentos.forEach(function(apartamento) {
-                L.marker([apartamento.latitude, apartamento.longitude]).addTo(map)
-                    .bindPopup("<b>" + apartamento.nome + "</b><br>" + apartamento.descricao);
-            });
+            // Adiciona marcador do usuário com ícone personalizado
+            L.marker([userLocation.lat, userLocation.lng], { icon: userIcon }).addTo(map)
+                .bindPopup("Você está aqui!").openPopup();
+        }, function(error) {
+            console.error("Erro ao obter a localização: ", error);
+            map.setView([-5.0917, -42.8012], 13);
+        });
+    } else {
+        map.setView([-5.0917, -42.8012], 13);
+    }
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    // Adiciona marcadores dos apartamentos com ícone personalizado
+    apartamentos.forEach(function(apartamento) {
+        L.marker([apartamento.latitude, apartamento.longitude], { icon: apartmentIcon }).addTo(map)
+            .bindPopup("<b>" + apartamento.nome + "</b><br>" + apartamento.descricao);
+    });
         </script>
     </div>
 </body>
