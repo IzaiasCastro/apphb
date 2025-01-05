@@ -33,6 +33,12 @@
                             <img src="/{{ foto }}" alt="Imagem do apartamento" class="w-full h-48 object-cover rounded-md">
                         {% endfor %}
                     </div>
+                    
+                    {% if session['user_type'] == 'dono' %}
+                        <div class="mt-4">
+                            <a href="{{ url_for('editar_apartamento', id=apartamento.id) }}" class="text-blue-500 hover:underline">Editar Apartamento</a>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
